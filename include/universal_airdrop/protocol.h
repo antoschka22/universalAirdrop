@@ -11,6 +11,7 @@ constexpr uint16_t DEFAULT_TCP_PORT = 9090;
 constexpr uint16_t DEFAULT_UDP_PORT = 9091;
 constexpr const char* BROADCAST_ADDR = "255.255.255.255";
 constexpr const char* MAGIC = "UAIRDROP";
+constexpr const char* HEADER_DELIM = "\n";
 constexpr size_t CHUNK_SIZE = 4096;
 constexpr int DISCOVERY_INTERVAL_SEC = 2;
 
@@ -64,7 +65,7 @@ struct FileHeader {
 inline std::string serialize_file_header(const FileHeader& hdr) {
     std::ostringstream oss;
     oss << MAGIC << ":" << static_cast<int>(MsgType::FILE_HEADER) << ":"
-        << hdr.filename << ":" << hdr.size;
+        << hdr.filename << ":" << hdr.size << HEADER_DELIM;
     return oss.str();
 }
 

@@ -91,17 +91,36 @@ void TcpServer::accept_loop() {
 void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip) {
     std::cout << "[TCP] Connection from " << client_ip << "\n";
 
-    // Read file header
-    char header_buf[1024]{};
-    int header_len = recv(client_sock, header_buf, sizeof(header_buf) - 1, 0);
-    if (header_len <= 0) {
-        std::cerr << "[TCP] Failed to read header\n";
-        SOCK_CLOSE(client_sock);
-        return;
+    // Read data until we find the header delimiter
+    std::string header_str;
+    std::vector<char> overflow;
+    char buf[4096];
+
+    while (true) {
+        int n = recv(client_sock, buf, sizeof(buf), 0);
+        if (n <= 0) {
+            std::cerr << "[TCP] Failed to read header\n";
+            SOCK_CLOSE(client_sock);
+            return;
+        }
+
+        std::string chunk(buf, n);
+        auto delim_pos = chunk.find(HEADER_DELIM);
+        if (delim_pos != std::string::npos) {
+            header_str += chunk.substr(0, delim_pos);
+            // Any bytes after the delimiter are file data
+            size_t data_start = delim_pos + 1;
+            if (data_start < chunk.size()) {
+                overflow.insert(overflow.end(),
+                               buf + data_start, buf + n);
+            }
+            break;
+        }
+        header_str += chunk;
     }
 
     FileHeader header{};
-    if (!parse_file_header(std::string(header_buf, header_len), header)) {
+    if (!parse_file_header(header_str, header)) {
         std::cerr << "[TCP] Invalid file header\n";
         SOCK_CLOSE(client_sock);
         return;
@@ -110,15 +129,21 @@ void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip
     std::cout << "[TCP] Receiving: " << header.filename
               << " (" << header.size << " bytes) from " << client_ip << "\n";
 
-    // Create receive directory
     MKDIR(receive_dir_.c_str());
 
-    // Receive file data
+    // Receive file data (starting with any overflow from the header read)
     std::vector<char> file_data;
     file_data.reserve(header.size);
-
     uint64_t received = 0;
-    char buf[CHUNK_SIZE];
+
+    if (!overflow.empty()) {
+        size_t take = std::min(overflow.size(),
+                               static_cast<size_t>(header.size));
+        file_data.insert(file_data.end(), overflow.begin(),
+                         overflow.begin() + take);
+        received += take;
+    }
+
     while (received < header.size) {
         size_t to_read = std::min(static_cast<uint64_t>(CHUNK_SIZE),
                                   header.size - received);
@@ -136,7 +161,6 @@ void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip
     bool ok = write_file(receive_dir_, header.filename,
                          file_data.data(), file_data.size());
 
-    // Send ACK/ERR
     MsgType resp = ok ? MsgType::FILE_ACK : MsgType::FILE_ERR;
     std::string resp_str = std::string(MAGIC) + ":" +
                            std::to_string(static_cast<int>(resp)) + ":";
