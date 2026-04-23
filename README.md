@@ -1,6 +1,6 @@
 # Universal Airdrop
 
-A cross-platform local file-sharing application inspired by Apple's AirDrop. Send files between devices on the same Wi-Fi network — Windows, macOS, Linux, or any combination — without a central server.
+A cross-platform local file-sharing application inspired by Apple's AirDrop. Send files between devices on the same Wi-Fi network — Windows, macOS, Linux, or any combination — without a central server
 
 ## How It Works
 
