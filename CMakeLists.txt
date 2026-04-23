@@ -65,3 +65,52 @@ if(BUILD_GUI)
     target_link_libraries(airdrop-gui PRIVATE
         Qt6::Core Qt6::Widgets Qt6::Network OpenSSL::Crypto)
 endif()
+
+# ========== Tests ==========
+option(BUILD_TESTS "Build unit and integration tests" ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+    find_package(GTest REQUIRED)
+
+    # Library sources (without main.cpp) for linking into tests
+    set(LIB_SOURCES
+        src/tcp_server.cpp
+        src/tcp_client.cpp
+        src/udp_discovery.cpp
+        src/file_transfer.cpp
+        src/crypto.cpp
+    )
+
+    add_executable(test_protocol tests/test_protocol.cpp ${LIB_SOURCES})
+    target_include_directories(test_protocol PRIVATE include)
+    target_link_libraries(test_protocol PRIVATE GTest::gtest GTest::gtest_main OpenSSL::Crypto)
+    if(UNIX)
+        target_link_libraries(test_protocol PRIVATE pthread)
+    endif()
+    add_test(NAME Protocol COMMAND test_protocol)
+
+    add_executable(test_crypto tests/test_crypto.cpp ${LIB_SOURCES})
+    target_include_directories(test_crypto PRIVATE include)
+    target_link_libraries(test_crypto PRIVATE GTest::gtest GTest::gtest_main OpenSSL::Crypto)
+    if(UNIX)
+        target_link_libraries(test_crypto PRIVATE pthread)
+    endif()
+    add_test(NAME Crypto COMMAND test_crypto)
+
+    add_executable(test_file_transfer tests/test_file_transfer.cpp ${LIB_SOURCES})
+    target_include_directories(test_file_transfer PRIVATE include)
+    target_link_libraries(test_file_transfer PRIVATE GTest::gtest GTest::gtest_main OpenSSL::Crypto)
+    if(UNIX)
+        target_link_libraries(test_file_transfer PRIVATE pthread)
+    endif()
+    add_test(NAME FileTransfer COMMAND test_file_transfer)
+
+    add_executable(test_integration tests/test_integration.cpp ${LIB_SOURCES})
+    target_include_directories(test_integration PRIVATE include)
+    target_link_libraries(test_integration PRIVATE GTest::gtest GTest::gtest_main OpenSSL::Crypto)
+    if(UNIX)
+        target_link_libraries(test_integration PRIVATE pthread)
+    endif()
+    add_test(NAME Integration COMMAND test_integration)
+endif()
