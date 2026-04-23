@@ -19,6 +19,7 @@ public:
     bool start();
     void stop();
     void set_receive_dir(const std::string& dir);
+    void set_passphrase(const std::string& passphrase);
 
 private:
     void accept_loop();
@@ -26,6 +27,7 @@ private:
 
     uint16_t port_;
     std::string receive_dir_ = "./received";
+    std::string passphrase_;
     socket_t listen_sock_ = INVALID_SOCK;
     std::atomic<bool> running_{false};
     std::thread accept_thread_;

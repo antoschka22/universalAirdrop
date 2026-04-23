@@ -1,16 +1,8 @@
 #include "universal_airdrop/tcp_server.h"
 #include "universal_airdrop/file_transfer.h"
+#include "universal_airdrop/crypto.h"
 #include <iostream>
 #include <cstring>
-#include <sys/stat.h>
-
-#ifdef _WIN32
-    #include <direct.h>
-    #define MKDIR(dir) _mkdir(dir)
-#else
-    #include <sys/types.h>
-    #define MKDIR(dir) mkdir(dir, 0755)
-#endif
 
 namespace uair {
 
@@ -71,10 +63,14 @@ void TcpServer::set_receive_dir(const std::string& dir) {
     receive_dir_ = dir;
 }
 
+void TcpServer::set_passphrase(const std::string& passphrase) {
+    passphrase_ = passphrase;
+}
+
 void TcpServer::accept_loop() {
     while (running_) {
         sockaddr_in client_addr{};
-        socklen_t addr_len = sizeof(client_addr);
+        SOCKLEN_T addr_len = sizeof(client_addr);
         socket_t client_sock = accept(listen_sock_,
             reinterpret_cast<sockaddr*>(&client_addr), &addr_len);
 
@@ -108,7 +104,6 @@ void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip
         auto delim_pos = chunk.find(HEADER_DELIM);
         if (delim_pos != std::string::npos) {
             header_str += chunk.substr(0, delim_pos);
-            // Any bytes after the delimiter are file data
             size_t data_start = delim_pos + 1;
             if (data_start < chunk.size()) {
                 overflow.insert(overflow.end(),
@@ -127,20 +122,21 @@ void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip
     }
 
     std::cout << "[TCP] Receiving: " << header.filename
-              << " (" << header.size << " bytes) from " << client_ip << "\n";
+              << " (" << header.size << " bytes"
+              << (header.encrypted ? ", encrypted" : "") << ") from " << client_ip << "\n";
 
-    MKDIR(receive_dir_.c_str());
+    make_directory(receive_dir_.c_str());
 
-    // Receive file data (starting with any overflow from the header read)
-    std::vector<char> file_data;
-    file_data.reserve(header.size);
+    // Receive payload (encrypted or raw)
+    std::vector<char> payload;
+    payload.reserve(header.size);
     uint64_t received = 0;
 
     if (!overflow.empty()) {
         size_t take = std::min(overflow.size(),
                                static_cast<size_t>(header.size));
-        file_data.insert(file_data.end(), overflow.begin(),
-                         overflow.begin() + take);
+        payload.insert(payload.end(), overflow.begin(),
+                       overflow.begin() + take);
         received += take;
     }
 
@@ -149,7 +145,7 @@ void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip
                                   header.size - received);
         int n = recv(client_sock, buf, to_read, 0);
         if (n <= 0) break;
-        file_data.insert(file_data.end(), buf, buf + n);
+        payload.insert(payload.end(), buf, buf + n);
         received += n;
 
         uint64_t pct = (received * 100) / header.size;
@@ -158,8 +154,34 @@ void TcpServer::handle_client(socket_t client_sock, const std::string& client_ip
     }
     std::cout << "\n";
 
-    bool ok = write_file(receive_dir_, header.filename,
-                         file_data.data(), file_data.size());
+    bool ok = false;
+
+    if (header.encrypted) {
+        // Decrypt the payload
+        if (passphrase_.empty()) {
+            std::cerr << "[CRYPTO] Encrypted file received but no passphrase set\n";
+        } else {
+            std::vector<uint8_t> enc_data(payload.begin(), payload.end());
+            EncryptedBlob blob;
+            if (!deserialize_encrypted(enc_data, blob)) {
+                std::cerr << "[CRYPTO] Failed to deserialize encrypted data\n";
+            } else {
+                auto decrypted = decrypt(blob, passphrase_);
+                if (decrypted.empty()) {
+                    std::cerr << "[CRYPTO] Decryption failed (wrong passphrase?)\n";
+                } else {
+                    std::cerr << "[CRYPTO] Decrypted " << payload.size()
+                              << " -> " << decrypted.size() << " bytes\n";
+                    ok = write_file(receive_dir_, header.filename,
+                                    reinterpret_cast<const char*>(decrypted.data()),
+                                    decrypted.size());
+                }
+            }
+        }
+    } else {
+        ok = write_file(receive_dir_, header.filename,
+                        payload.data(), payload.size());
+    }
 
     MsgType resp = ok ? MsgType::FILE_ACK : MsgType::FILE_ERR;
     std::string resp_str = std::string(MAGIC) + ":" +

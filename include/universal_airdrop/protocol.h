@@ -21,6 +21,7 @@ enum class MsgType : uint8_t {
     FILE_DATA = 3,
     FILE_ACK = 4,
     FILE_ERR = 5,
+    FILE_HEADER_ENCRYPTED = 6,
 };
 
 struct DeviceInfo {
@@ -38,7 +39,6 @@ inline std::string serialize_discovery(const DeviceInfo& info) {
 }
 
 inline bool parse_discovery(const std::string& raw, DeviceInfo& out) {
-    // format: UAIRDROP:1:name:os:port
     if (raw.rfind(MAGIC, 0) != 0) return false;
 
     std::istringstream iss(raw);
@@ -60,11 +60,14 @@ inline bool parse_discovery(const std::string& raw, DeviceInfo& out) {
 struct FileHeader {
     std::string filename;
     uint64_t size;
+    bool encrypted = false;
 };
 
 inline std::string serialize_file_header(const FileHeader& hdr) {
     std::ostringstream oss;
-    oss << MAGIC << ":" << static_cast<int>(MsgType::FILE_HEADER) << ":"
+    int type = hdr.encrypted ? static_cast<int>(MsgType::FILE_HEADER_ENCRYPTED)
+                             : static_cast<int>(MsgType::FILE_HEADER);
+    oss << MAGIC << ":" << type << ":"
         << hdr.filename << ":" << hdr.size << HEADER_DELIM;
     return oss.str();
 }
@@ -79,10 +82,14 @@ inline bool parse_file_header(const std::string& raw, FileHeader& out) {
     if (!std::getline(iss, filename, ':')) return false;
     if (!std::getline(iss, size_str, ':')) return false;
 
-    if (std::stoi(type_str) != static_cast<int>(MsgType::FILE_HEADER)) return false;
+    int type = std::stoi(type_str);
+    if (type != static_cast<int>(MsgType::FILE_HEADER) &&
+        type != static_cast<int>(MsgType::FILE_HEADER_ENCRYPTED))
+        return false;
 
     out.filename = filename;
     out.size = std::stoull(size_str);
+    out.encrypted = (type == static_cast<int>(MsgType::FILE_HEADER_ENCRYPTED));
     return true;
 }
 

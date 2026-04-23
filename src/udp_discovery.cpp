@@ -96,15 +96,7 @@ void UdpDiscovery::broadcast_loop() {
 
     DeviceInfo info;
     info.name = device_name_;
-#ifdef _WIN32
-    info.os = "Windows";
-#elif __APPLE__
-    info.os = "macOS";
-#elif __linux__
-    info.os = "Linux";
-#else
-    info.os = "Unknown";
-#endif
+    info.os = get_os_name();
     info.tcp_port = tcp_port_;
 
     std::string payload = serialize_discovery(info);
@@ -121,7 +113,7 @@ void UdpDiscovery::listen_loop() {
     char buf[1024];
     while (running_) {
         sockaddr_in sender{};
-        socklen_t sender_len = sizeof(sender);
+        SOCKLEN_T sender_len = sizeof(sender);
 
         int n = recvfrom(listen_sock_, buf, sizeof(buf) - 1, 0,
                          reinterpret_cast<sockaddr*>(&sender), &sender_len);

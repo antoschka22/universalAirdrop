@@ -13,6 +13,7 @@ public:
 
     bool send_file(const std::string& ip, uint16_t port,
                    const std::string& filepath,
+                   const std::string& passphrase = "",
                    ProgressCallback progress = nullptr);
 
 private:

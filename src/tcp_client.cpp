@@ -1,5 +1,6 @@
 #include "universal_airdrop/tcp_client.h"
 #include "universal_airdrop/file_transfer.h"
+#include "universal_airdrop/crypto.h"
 #include <iostream>
 #include <cstring>
 
@@ -17,11 +18,25 @@ bool TcpClient::send_all(socket_t sock, const char* data, size_t len) {
 
 bool TcpClient::send_file(const std::string& ip, uint16_t port,
                            const std::string& filepath,
+                           const std::string& passphrase,
                            ProgressCallback progress) {
     FileData file;
     if (!read_file(filepath, file)) {
         std::cerr << "[TCP] Cannot read file: " << filepath << "\n";
         return false;
+    }
+
+    bool encrypted = !passphrase.empty();
+    std::vector<uint8_t> payload;
+
+    if (encrypted) {
+        std::vector<uint8_t> plain(file.bytes.begin(), file.bytes.end());
+        auto blob = encrypt(plain, passphrase);
+        payload = serialize_encrypted(blob);
+        std::cerr << "[CRYPTO] Encrypted " << file.bytes.size()
+                  << " bytes -> " << payload.size() << " bytes (AES-256-GCM)\n";
+    } else {
+        payload.assign(file.bytes.begin(), file.bytes.end());
     }
 
     socket_t sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -48,7 +63,7 @@ bool TcpClient::send_file(const std::string& ip, uint16_t port,
     }
 
     // Send file header
-    FileHeader header{file.filename, file.bytes.size()};
+    FileHeader header{file.filename, payload.size(), encrypted};
     std::string header_str = serialize_file_header(header);
     if (!send_all(sock, header_str.c_str(), header_str.size())) {
         std::cerr << "[TCP] Failed to send header\n";
@@ -56,14 +71,15 @@ bool TcpClient::send_file(const std::string& ip, uint16_t port,
         return false;
     }
 
-    // Send file data in chunks
+    // Send payload in chunks
     uint64_t total_sent = 0;
-    uint64_t total_size = file.bytes.size();
+    uint64_t total_size = payload.size();
 
     while (total_sent < total_size) {
         size_t chunk = std::min(static_cast<uint64_t>(CHUNK_SIZE),
                                 total_size - total_sent);
-        if (!send_all(sock, file.bytes.data() + total_sent, chunk)) {
+        if (!send_all(sock, reinterpret_cast<const char*>(payload.data() + total_sent),
+                      chunk)) {
             std::cerr << "[TCP] Send failed\n";
             SOCK_CLOSE(sock);
             return false;
@@ -85,7 +101,8 @@ bool TcpClient::send_file(const std::string& ip, uint16_t port,
     int resp_len = recv(sock, resp_buf, sizeof(resp_buf) - 1, 0);
     std::string resp(resp_buf, resp_len);
 
-    bool success = resp.find(std::to_string(static_cast<int>(MsgType::FILE_ACK))) != std::string::npos;
+    bool success = resp.find(std::to_string(static_cast<int>(MsgType::FILE_ACK)))
+                   != std::string::npos;
 
     SOCK_CLOSE(sock);
 

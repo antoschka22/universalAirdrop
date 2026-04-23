@@ -4,10 +4,8 @@
 #include "universal_airdrop/platform.h"
 #include <iostream>
 #include <string>
-#include <csignal>
 #include <atomic>
 #include <thread>
-#include <cstring>
 
 static std::atomic<bool> g_running{true};
 
@@ -20,14 +18,18 @@ static void print_usage() {
 Universal Airdrop - Cross-platform local file sharing
 
 Usage:
-  airdrop discover <your_name>              Discover devices on the network
-  airdrop send <ip> <port> <filepath>       Send a file to a device
-  airdrop receive [port] [output_dir]       Receive files (default: port 9090, dir ./received)
+  airdrop discover <your_name>                       Discover devices on the network
+  airdrop send <ip> <port> <filepath> [passphrase]   Send a file (optional encryption)
+  airdrop receive [port] [output_dir] [passphrase]  Receive files (optional encryption)
+
+Options:
+  When a passphrase is provided, files are encrypted with AES-256-GCM before transfer.
 
 Examples:
   airdrop discover "John's Laptop"
   airdrop send 192.168.1.50 9090 ./photo.jpg
-  airdrop receive 9090 ./downloads
+  airdrop send 192.168.1.50 9090 ./secret.txt mypassword
+  airdrop receive 9090 ./downloads mypassword
 )";
 }
 
@@ -41,14 +43,13 @@ int cmd_discover(const std::string& name) {
 
     if (!discovery.start()) return 1;
 
-    // Also start a TCP server so others can send us files
     uair::TcpServer server;
     server.set_receive_dir("./received");
     server.start();
 
     std::cout << "Scanning for devices... Press Ctrl+C to stop.\n\n";
 
-    signal(SIGINT, signal_handler);
+    install_signal_handler(signal_handler);
     while (g_running) {
         auto devices = discovery.get_devices();
         std::cout << "\n--- Known Devices (" << devices.size() << ") ---\n";
@@ -66,30 +67,38 @@ int cmd_discover(const std::string& name) {
     return 0;
 }
 
-int cmd_send(const std::string& ip, uint16_t port, const std::string& filepath) {
+int cmd_send(const std::string& ip, uint16_t port,
+             const std::string& filepath, const std::string& passphrase) {
     uair::TcpClient client;
-    bool ok = client.send_file(ip, port, filepath, [](uint64_t sent, uint64_t total) {
-        uint64_t pct = (sent * 100) / total;
-        std::cout << "\r[TCP] Sending: " << pct << "%" << std::flush;
-    });
+    bool ok = client.send_file(ip, port, filepath, passphrase,
+        [](uint64_t sent, uint64_t total) {
+            uint64_t pct = (sent * 100) / total;
+            std::cout << "\r[TCP] Sending: " << pct << "%" << std::flush;
+        });
     return ok ? 0 : 1;
 }
 
-int cmd_receive(uint16_t port, const std::string& output_dir) {
+int cmd_receive(uint16_t port, const std::string& output_dir,
+                const std::string& passphrase) {
     uair::TcpServer server(port);
     server.set_receive_dir(output_dir);
+    if (!passphrase.empty()) {
+        server.set_passphrase(passphrase);
+    }
 
     if (!server.start()) return 1;
 
-    // Also start discovery so we appear on the network
     uair::UdpDiscovery discovery("AirdropReceiver");
     discovery.start();
 
     std::cout << "Waiting for incoming files on port " << port
               << ". Files saved to " << output_dir << "/\n";
+    if (!passphrase.empty()) {
+        std::cout << "[CRYPTO] Encryption enabled (AES-256-GCM)\n";
+    }
     std::cout << "Press Ctrl+C to stop.\n";
 
-    signal(SIGINT, signal_handler);
+    install_signal_handler(signal_handler);
     while (g_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
@@ -117,11 +126,15 @@ int main(int argc, char* argv[]) {
     if (cmd == "discover" && argc >= 3) {
         result = cmd_discover(argv[2]);
     } else if (cmd == "send" && argc >= 5) {
-        result = cmd_send(argv[2], static_cast<uint16_t>(std::stoi(argv[3])), argv[4]);
+        std::string passphrase = (argc >= 6) ? argv[5] : "";
+        result = cmd_send(argv[2], static_cast<uint16_t>(std::stoi(argv[3])),
+                         argv[4], passphrase);
     } else if (cmd == "receive") {
-        uint16_t port = (argc >= 3) ? static_cast<uint16_t>(std::stoi(argv[2])) : uair::DEFAULT_TCP_PORT;
+        uint16_t port = (argc >= 3) ? static_cast<uint16_t>(std::stoi(argv[2]))
+                                    : uair::DEFAULT_TCP_PORT;
         std::string dir = (argc >= 4) ? argv[3] : "./received";
-        result = cmd_receive(port, dir);
+        std::string passphrase = (argc >= 5) ? argv[4] : "";
+        result = cmd_receive(port, dir, passphrase);
     } else {
         print_usage();
     }
