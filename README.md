@@ -165,7 +165,3 @@ UAIRDROP:6:<filename>:<filesize>\n      (encrypted)
 UAIRDROP:4:   (ACK — success)
 UAIRDROP:5:   (ERR — failure)
 ```
-
-## License
-
-This project is open source and available for portfolio and educational use.
