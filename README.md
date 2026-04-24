@@ -61,6 +61,7 @@ src/
 | File I/O | `<filesystem>` (C++17) |
 | Threading | `<thread>`, `<mutex>`, `<atomic>` |
 | GUI | Qt 6 (Widgets, Network) |
+| Testing | Google Test (gtest) |
 | Build | CMake 3.16+, GNU Make fallback |
 
 ## Usage
@@ -137,6 +138,43 @@ cmake .. -DBUILD_GUI=ON
 make
 ./airdrop-gui
 ```
+
+## Testing
+
+The project uses **Google Test (gtest)** for unit and integration testing. There are 57 tests across 4 test suites:
+
+| Test Suite | Tests | What It Covers |
+|---|---|---|
+| `test_protocol` | 19 | Discovery message serialization/parsing, file header round-trips, magic string validation, type field checking, truncation rejection, wire-format constants |
+| `test_crypto` | 17 | PBKDF2 key derivation consistency, AES-256-GCM encrypt/decrypt round-trips, wrong-passphrase rejection, empty data, large data (100 KB), binary data (all byte values), ciphertext randomness, serialization/deserialization, tampering detection |
+| `test_file_transfer` | 13 | File read/write round-trips, binary I/O (all byte values), empty files, missing files, directory creation, filename extraction from paths |
+| `test_integration` | 8 | End-to-end TCP transfers: small file, large file (100 KB), encrypted with correct passphrase, encrypted with wrong passphrase, encrypted with no receiver passphrase, connection failure, missing file, encrypted binary round-trip |
+
+### Running Tests
+
+**Makefile (macOS / Linux):**
+
+```bash
+# Build and run all tests
+make test
+
+# Build and run individual test suites
+make test_protocol && ./test_protocol
+make test_crypto && ./test_crypto
+make test_file_transfer && ./test_file_transfer
+make test_integration && ./test_integration
+```
+
+**CMake (cross-platform):**
+
+```bash
+mkdir build && cd build
+cmake .. -DBUILD_TESTS=ON
+make
+ctest --output-on-failure
+```
+
+Requires: Google Test (`brew install googletest` on macOS, or your package manager's equivalent)
 
 ## Protocol Details
 

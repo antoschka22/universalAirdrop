@@ -22,7 +22,10 @@ protected:
     std::string test_dir;
     std::string send_dir;
     std::string recv_dir;
-    uint16_t next_port = 10090;  // Start from a high port to avoid conflicts
+    // Each test gets a unique port to avoid EADDRINUSE when tests
+    // run in quick succession. Starting from a high port reduces
+    // the chance of colliding with system services.
+    uint16_t next_port = 10090;
 
     void SetUp() override {
         init_networking();
@@ -38,7 +41,8 @@ protected:
         cleanup_networking();
     }
 
-    // Helper: create a file with specific content and return its path
+    // Create a temp file with the given content and return its path.
+    // Used by tests to prepare a file for sending over TCP.
     std::string create_test_file(const std::string& name, const std::string& content) {
         std::string path = send_dir + "/" + name;
         std::ofstream ofs(path, std::ios::binary);
@@ -46,14 +50,19 @@ protected:
         return path;
     }
 
-    // Helper: get a unique port for each test
+    // Return the next available port and increment the counter.
+    // This prevents port conflicts between concurrent test runs.
     uint16_t get_port() { return next_port++; }
 };
 
 // ============================================================
-// Basic TCP transfer tests
+// Basic TCP transfer tests — verify that a real client can send
+// a file to a real server over the loopback interface.
 // ============================================================
 
+// End-to-end: send a small text file without encryption, then verify
+// the received content matches byte-for-byte. This is the simplest
+// "happy path" through the entire TCP pipeline.
 TEST_F(IntegrationTest, SendSmallFileUnencrypted) {
     uint16_t port = get_port();
     std::string filepath = create_test_file("small.txt", "Hello, Airdrop!");
@@ -80,6 +89,9 @@ TEST_F(IntegrationTest, SendSmallFileUnencrypted) {
     EXPECT_EQ(content, "Hello, Airdrop!");
 }
 
+// Send a 100 KB binary file with a repeating 0–255 byte pattern.
+// This exercises the chunked send/receive loop and verifies that
+// no bytes are dropped or duplicated during multi-chunk transfer.
 TEST_F(IntegrationTest, SendLargeFileUnencrypted) {
     uint16_t port = get_port();
 
@@ -116,9 +128,12 @@ TEST_F(IntegrationTest, SendLargeFileUnencrypted) {
 }
 
 // ============================================================
-// Encrypted transfer tests
+// Encrypted transfer tests — verify AES-256-GCM encryption works
+// end-to-end through the TCP pipeline.
 // ============================================================
 
+// Send a file with passphrase encryption, receive with the correct
+// passphrase, and verify the decrypted content matches the original.
 TEST_F(IntegrationTest, SendFileEncryptedCorrectPassphrase) {
     uint16_t port = get_port();
     std::string filepath = create_test_file("secret.txt", "Secret data!");
@@ -143,6 +158,10 @@ TEST_F(IntegrationTest, SendFileEncryptedCorrectPassphrase) {
     EXPECT_EQ(content, "Secret data!");
 }
 
+// Send an encrypted file, but the receiver uses a different passphrase.
+// The TCP bytes arrive successfully, but GCM authentication fails
+// during decryption. The file should NOT be saved to disk (or should
+// contain garbage), proving that wrong passphrases are rejected.
 TEST_F(IntegrationTest, SendFileEncryptedWrongPassphrase) {
     uint16_t port = get_port();
     std::string filepath = create_test_file("willfail.txt", "This should not decrypt");
@@ -171,6 +190,10 @@ TEST_F(IntegrationTest, SendFileEncryptedWrongPassphrase) {
     // that the correct passphrase is needed for decryption
 }
 
+// The sender encrypts, but the receiver has no passphrase set.
+// Decryption with an empty key must fail, so the file should not
+// be saved. This tests the "forgot to set passphrase on the
+// receiving end" scenario.
 TEST_F(IntegrationTest, SendFileEncryptedNoPassphraseOnReceiver) {
     uint16_t port = get_port();
     std::string filepath = create_test_file("enc_nopass.txt", "Encrypted but no receiver passphrase");
@@ -195,9 +218,12 @@ TEST_F(IntegrationTest, SendFileEncryptedNoPassphraseOnReceiver) {
 }
 
 // ============================================================
-// Connection failure tests
+// Connection failure tests — verify that the client handles
+// network errors gracefully instead of crashing.
 // ============================================================
 
+// Trying to send a file to a port with no server must return false.
+// This tests the connection-failure code path in TcpClient.
 TEST_F(IntegrationTest, SendToNonExistentServer) {
     TcpClient client;
     // Port 19999 is very unlikely to have a server
@@ -205,6 +231,8 @@ TEST_F(IntegrationTest, SendToNonExistentServer) {
     EXPECT_FALSE(ok);
 }
 
+// Trying to send a file that doesn't exist must return false.
+// The server should remain running and unaffected.
 TEST_F(IntegrationTest, SendNonExistentFile) {
     uint16_t port = get_port();
 
@@ -222,9 +250,16 @@ TEST_F(IntegrationTest, SendNonExistentFile) {
 }
 
 // ============================================================
-// Binary data round-trip
+// Binary data round-trip — the most thorough integration test.
+// Sends binary data through the full encrypt → TCP → decrypt
+// pipeline and verifies byte-for-byte correctness.
 // ============================================================
 
+// Send all byte values 0x00–0xFF (512 bytes) through encryption,
+// TCP transfer, and decryption. This is the highest-fidelity test:
+// it exercises the entire pipeline end-to-end, including the
+// AES-GCM cipher, TCP framing, and file I/O, with data that
+// contains every possible byte value.
 TEST_F(IntegrationTest, SendBinaryFileEncrypted) {
     uint16_t port = get_port();
 
