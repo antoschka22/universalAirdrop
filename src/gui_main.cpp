@@ -1,6 +1,7 @@
 #include "universal_airdrop/platform.h"
 #include "universal_airdrop/main_window.h"
 #include <QApplication>
+#include <iostream>
 
 int main(int argc, char* argv[]) {
     if (init_networking() != 0) {

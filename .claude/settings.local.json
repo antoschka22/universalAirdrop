@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vcpkg --version)",
+      "Bash(winget --version)",
+      "Bash(choco --version)",
+      "Bash(winget install *)",
+      "Bash(winget search *)",
+      "Bash(cl --version)",
+      "Bash(g++ --version)",
+      "Bash(where cl *)",
+      "Bash(powershell *)",
+      "Bash(where qtcreator *)",
+      "Bash(aqt install-qt *)",
+      "Bash(pip3 install *)",
+      "Bash(C:/Users/anton/AppData/Local/Python/pythoncore-3.14-64/Scripts/aqt.exe install-qt *)",
+      "Bash(C:/Users/anton/AppData/Local/Python/pythoncore-3.14-64/Scripts/aqt.exe list-qt *)",
+      "Bash(cmd *)",
+      "Bash(cmake .. *)",
+      "Bash(start *)",
+      "Bash(C:/Qt/6.8.2/msvc2022_64/bin/windeployqt.exe *)"
+    ]
+  }
+}

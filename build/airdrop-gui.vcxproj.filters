@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\mocs_compilation_Debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\gui\main_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\gui\gui_helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\gui_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\tcp_server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\tcp_client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\udp_discovery.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\file_transfer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\src\crypto.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\mocs_compilation_Release.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\mocs_compilation_MinSizeRel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\mocs_compilation_RelWithDebInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\anton\Desktop\universalAirdrop\include\universal_airdrop\gui_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\anton\Desktop\universalAirdrop\include\universal_airdrop\main_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\include_Debug\src\gui\ui_main_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\include_Release\src\gui\ui_main_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\include_MinSizeRel\src\gui\ui_main_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\include_RelWithDebInfo\src\gui\ui_main_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\anton\Desktop\universalAirdrop\build\CMakeFiles\489ced476ab15218929c3300a32cd678\autouic_(CONFIG).stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\anton\Desktop\universalAirdrop\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\anton\Desktop\universalAirdrop\src\gui\main_window.ui" />
+    <None Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\autouic_Debug.stamp" />
+    <None Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\autouic_Release.stamp" />
+    <None Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\autouic_MinSizeRel.stamp" />
+    <None Include="C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\autouic_RelWithDebInfo.stamp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{B23F7F74-D453-318A-9D60-1094E9175351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{CBFD9ECC-1ACA-3368-871F-1C0FEDED3EAF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2EA16447-044B-3764-ACC6-9AE6ECE7BE2D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

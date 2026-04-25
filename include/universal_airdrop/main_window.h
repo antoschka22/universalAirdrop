@@ -45,10 +45,6 @@ private slots:
     void on_receive_toggled(bool checked);
     /** Called when a new device is discovered */
     void on_device_found(const DeviceInfo& device);
-    /** Called during file transfer with progress updates */
-    void on_send_progress(uint64_t sent, uint64_t total);
-    /** Called when a file transfer completes */
-    void on_send_finished(bool success);
 
 private:
     Ui::MainWindow* ui;

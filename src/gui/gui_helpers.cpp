@@ -42,22 +42,24 @@ void SendWorker::send(const std::string& ip, uint16_t port,
 // ========== ReceiveWorker ==========
 
 ReceiveWorker::ReceiveWorker(QObject* parent)
-    : QObject(parent), server_(), discovery_("AirdropReceiver") {}
+    : QObject(parent), server_(nullptr), discovery_("AirdropReceiver") {}
 
 void ReceiveWorker::start(uint16_t port, const std::string& dir,
                           const std::string& passphrase) {
-    server_ = TcpServer(port);
-    server_.set_receive_dir(dir);
+    server_ = std::make_unique<TcpServer>(port);
+    server_->set_receive_dir(dir);
     if (!passphrase.empty()) {
-        server_.set_passphrase(passphrase);
+        server_->set_passphrase(passphrase);
     }
-    server_.start();
+    server_->start();
     discovery_.start();
     emit started(port);
 }
 
 void ReceiveWorker::stop() {
-    server_.stop();
+    if (server_) {
+        server_->stop();
+    }
     discovery_.stop();
 }
 

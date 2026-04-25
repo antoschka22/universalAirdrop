@@ -25,9 +25,14 @@
      * Winsock requires explicit initialization via WSAStartup() before
      * any socket functions can be used, and WSACleanup() when done.
      * The WIN32_LEAN_AND_MEAN macro excludes rarely-used Windows headers
-     * to speed up compilation. */
+     * to speed up compilation.
+     * NOMINMAX prevents Windows from defining min/max macros that conflict
+     * with std::min/std::max. */
     #ifndef WIN32_LEAN_AND_MEAN
         #define WIN32_LEAN_AND_MEAN
+    #endif
+    #ifndef NOMINMAX
+        #define NOMINMAX
     #endif
     #include <winsock2.h>
     #include <ws2tcpip.h>   /* inet_pton, inet_ntop, sockaddr_in */
@@ -66,6 +71,7 @@
      * in the future. */
     #include <windows.h>
     #include <csignal>
+    #include <direct.h>
     inline void install_signal_handler(void(*handler)(int)) {
         signal(SIGINT, handler);
     }

@@ -1,0 +1,4 @@
+C:/Users/anton/Desktop/universalAirdrop/build/CMakeFiles/airdrop.dir
+C:/Users/anton/Desktop/universalAirdrop/build/CMakeFiles/airdrop-gui.dir
+C:/Users/anton/Desktop/universalAirdrop/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/anton/Desktop/universalAirdrop/build/CMakeFiles/ZERO_CHECK.dir

@@ -1,0 +1,6 @@
+C:\Users\anton\Desktop\universalAirdrop\src\main.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop.dir\Release\main.obj
+C:\Users\anton\Desktop\universalAirdrop\src\tcp_server.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop.dir\Release\tcp_server.obj
+C:\Users\anton\Desktop\universalAirdrop\src\tcp_client.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop.dir\Release\tcp_client.obj
+C:\Users\anton\Desktop\universalAirdrop\src\udp_discovery.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop.dir\Release\udp_discovery.obj
+C:\Users\anton\Desktop\universalAirdrop\src\file_transfer.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop.dir\Release\file_transfer.obj
+C:\Users\anton\Desktop\universalAirdrop\src\crypto.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop.dir\Release\crypto.obj

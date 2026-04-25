@@ -1,0 +1,6 @@
+set(__QT_DEPLOY_TARGET_airdrop_FILE C:/Users/anton/Desktop/universalAirdrop/build/RelWithDebInfo/airdrop.exe)
+set(__QT_DEPLOY_TARGET_airdrop_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_airdrop_RUNTIME_DLLS )
+set(__QT_DEPLOY_TARGET_airdrop-gui_FILE C:/Users/anton/Desktop/universalAirdrop/build/RelWithDebInfo/airdrop-gui.exe)
+set(__QT_DEPLOY_TARGET_airdrop-gui_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_airdrop-gui_RUNTIME_DLLS C:/Qt/6.8.2/msvc2022_64/bin/Qt6Widgets.dll;C:/Qt/6.8.2/msvc2022_64/bin/Qt6Network.dll;C:/Qt/6.8.2/msvc2022_64/bin/Qt6Gui.dll;C:/Qt/6.8.2/msvc2022_64/bin/Qt6Core.dll)

@@ -18,12 +18,15 @@ set(CLI_SOURCES
 set(GUI_SOURCES
     src/gui/main_window.cpp
     src/gui/main_window.ui
+    src/gui/gui_helpers.cpp
     src/gui_main.cpp
     src/tcp_server.cpp
     src/tcp_client.cpp
     src/udp_discovery.cpp
     src/file_transfer.cpp
     src/crypto.cpp
+    include/universal_airdrop/gui_helpers.h
+    include/universal_airdrop/main_window.h
 )
 
 # ========== CLI Target ==========
@@ -51,6 +54,7 @@ if(BUILD_GUI)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTOUIC ON)
     set(CMAKE_AUTORCC ON)
+    set(CMAKE_AUTOMOC_PATH ${CMAKE_SOURCE_DIR}/include)
 
     add_executable(airdrop-gui ${GUI_SOURCES})
     target_include_directories(airdrop-gui PRIVATE include)

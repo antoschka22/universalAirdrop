@@ -1,0 +1,22 @@
+^C:\USERS\ANTON\DESKTOP\UNIVERSALAIRDROP\BUILD\CMAKEFILES\489CED476AB15218929C3300A32CD678\AUTOUIC_(CONFIG).STAMP.RULE
+setlocal
+cd C:\Users\anton\Desktop\universalAirdrop\build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\ANTON\DESKTOP\UNIVERSALAIRDROP\CMAKELISTS.TXT
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/anton/Desktop/universalAirdrop -BC:/Users/anton/Desktop/universalAirdrop/build --check-stamp-file C:/Users/anton/Desktop/universalAirdrop/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

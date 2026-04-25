@@ -1,0 +1,9 @@
+C:\Users\anton\Desktop\universalAirdrop\src\gui\main_window.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\main_window.obj
+C:\Users\anton\Desktop\universalAirdrop\src\gui\gui_helpers.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\gui_helpers.obj
+C:\Users\anton\Desktop\universalAirdrop\src\gui_main.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\gui_main.obj
+C:\Users\anton\Desktop\universalAirdrop\src\tcp_server.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\tcp_server.obj
+C:\Users\anton\Desktop\universalAirdrop\src\tcp_client.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\tcp_client.obj
+C:\Users\anton\Desktop\universalAirdrop\src\udp_discovery.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\udp_discovery.obj
+C:\Users\anton\Desktop\universalAirdrop\src\file_transfer.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\file_transfer.obj
+C:\Users\anton\Desktop\universalAirdrop\src\crypto.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\crypto.obj
+C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui_autogen\mocs_compilation_Release.cpp;C:\Users\anton\Desktop\universalAirdrop\build\airdrop-gui.dir\Release\mocs_compilation_Release.obj

@@ -18,7 +18,9 @@
 #pragma once
 
 #include <QObject>
+#include <QString>
 #include <string>
+#include <memory>
 #include "universal_airdrop/protocol.h"
 #include "universal_airdrop/tcp_server.h"
 #include "universal_airdrop/tcp_client.h"
@@ -92,13 +94,13 @@ public:
     void stop();
 
 signals:
-    /** Eitted when a file is received */
+    /** Emitted when a file is received */
     void fileReceived(const std::string& filename, uint64_t size, bool encrypted);
     /** Emitted when the server starts listening */
     void started(uint16_t port);
 
 private:
-    TcpServer server_;
+    std::unique_ptr<TcpServer> server_;
     UdpDiscovery discovery_;
 };
 
